@@ -1,30 +1,62 @@
 using Microsoft.AspNetCore.Mvc;
+using RestWithASPNET.Model;
+using RestWithASPNET.Model.Services;
 
 namespace RestWithASPNET.Controllers;
 
 [ApiController]
-[Route("[controller]")]
-public class CalculatorController : ControllerBase
+[Route("api/[controller]")]
+public class PersonController : ControllerBase
 {
 
-    private readonly ILogger<CalculatorController> _logger;
+    private readonly ILogger<PersonController> _logger;
+    private IPersonService _personService;
 
-    public CalculatorController(ILogger<CalculatorController> logger)
+    public PersonController(ILogger<PersonController> logger, IPersonService personService)
     {
         _logger = logger;
+        _personService = personService;
     }
 
-    [HttpGet("sum/{firstNumber}/{secondNumber}")]
-    public IActionResult Get(string firstNumber, string secondNumber)
+    [HttpGet]
+    public IActionResult Get()
     {
-        return BadRequest("Invalid Input");
+        return Ok(_personService.FindAll());
     }
 
-    private static bool IsNumeric(string strNumber)
+    [HttpGet("{id}")]
+    public IActionResult Get([FromRoute] long id)
     {
-        return double.TryParse(strNumber, System.Globalization.NumberStyles.Any,
-            System.Globalization.NumberFormatInfo.InvariantInfo, out _);
+        var person = _personService.FindById(id);
+        if(person == null) return NotFound();
+
+        return Ok(person);
+    }
+
+    [HttpPost]
+    public IActionResult Post([FromBody] Person person)
+    {
+        if (person == null) return BadRequest();
+        return Ok(_personService.Create(person));
+    }
+
+    [HttpPut]
+    public IActionResult Put([FromBody] Person person)
+    {
+        if (person == null) return BadRequest();
+        return Ok(_personService.Update(person));
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete([FromRoute] long id)
+    {
+        if (id <= 0) return BadRequest("ID inválido.");
         
+        var deleted = _personService.Delete(id);
+
+        if(!deleted) return NotFound("Registro não encontrado.");
+
+        return NoContent();
     }
 
 }
