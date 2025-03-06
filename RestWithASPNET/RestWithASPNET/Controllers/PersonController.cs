@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using RestWithASPNET.Model;
-using RestWithASPNET.Model.Services;
+using RestWithASPNET.Services;
 
 namespace RestWithASPNET.Controllers;
 
@@ -52,9 +52,7 @@ public class PersonController : ControllerBase
     {
         if (id <= 0) return BadRequest("ID inválido.");
         
-        var deleted = _personService.Delete(id);
-
-        if(!deleted) return NotFound("Registro não encontrado.");
+        _personService.Delete(id);
 
         return NoContent();
     }

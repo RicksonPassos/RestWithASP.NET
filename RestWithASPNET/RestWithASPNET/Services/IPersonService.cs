@@ -1,4 +1,6 @@
-﻿namespace RestWithASPNET.Model.Services
+﻿using RestWithASPNET.Model;
+
+namespace RestWithASPNET.Services
 {
     public interface IPersonService
     {
@@ -6,6 +8,6 @@
         Person FindById(long id);
         List<Person> FindAll();
         Person Update(Person person);
-        bool Delete(long id);
+        void Delete(long id);
     }
 }
