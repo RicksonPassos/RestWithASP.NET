@@ -1,4 +1,6 @@
-﻿namespace RestWithASPNET.Data.VO
+﻿using System.Text.Json.Serialization;
+
+namespace RestWithASPNET.Data.VO
 {
     public class PersonVO
     {
@@ -9,6 +11,7 @@
         public string LastName { get; set; }
 
         public string Address { get; set; }
+        [JsonPropertyName("sex")]
 
         public string Gender { get; set; }
     }
