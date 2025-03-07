@@ -11,7 +11,6 @@ namespace RestWithASPNET.Data.VO
         public string LastName { get; set; }
 
         public string Address { get; set; }
-        [JsonPropertyName("sex")]
 
         public string Gender { get; set; }
     }
