@@ -10,12 +10,73 @@ using RestWithASPNET.Repository.Generic;
 using Microsoft.Net.Http.Headers;
 using RestWithASPNET.Hypermedia.Filters;
 using RestWithASPNET.Hypermedia.Enricher;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Rewrite;
+using RestWithASPNET.Services;
+using RestWithASPNET.Model;
+using RestWithASPNET.Configurations;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using RestWithASPNET.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers();
+
+var tokenConfigurations = new TokenConfiguration();
+
+new ConfigureFromConfigurationOptions<TokenConfiguration>(
+    builder.Configuration.GetSection("TokenConfigurations")
+).Configure(tokenConfigurations);
+
+builder.Services.AddSingleton(tokenConfigurations);
+
+builder.Services.AddAuthentication(options =>
+{
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+   options.TokenValidationParameters = new TokenValidationParameters
+   {
+       ValidateAudience = false,
+       ValidateIssuer = false,
+       ValidateLifetime = true,
+       ValidateIssuerSigningKey = true,
+       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfigurations.Secret))
+   };
+});
+
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+	c.SwaggerDoc("v1",
+		new OpenApiInfo
+		{
+			Title = "REST API RESTful with ASP.NET 8",
+			Version = "v1",
+			Description = "API RESTful developed in course",
+			Contact = new OpenApiContact
+			{
+				Name = "Rickson",
+				Url = new Uri("https://exemplo.com")
+			}
+		});
+});
+
+builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
+{
+	builder.AllowAnyOrigin()
+	.AllowAnyMethod()
+	.AllowAnyOrigin();
+}));
 
 // Connection with MySQL
 var connection = builder.Configuration["MySQLConnection:MySQLConnectionString"];
@@ -50,6 +111,11 @@ builder.Services.AddApiVersioning();
 // Dependency Injection
 builder.Services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
 builder.Services.AddScoped<IBookBusiness, BookBusinessImplementation>();
+builder.Services.AddScoped<IloginBusiness, LoginBusinessImplementation>();
+
+builder.Services.AddTransient<ITokenService, TokenService>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
@@ -58,6 +124,19 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "REST API RESTful with ASP.NET 8");
+});
+
+var option = new RewriteOptions();
+option.AddRedirect("^$", "swagger");
+app.UseRewriter(option);
 
 app.UseAuthorization();
 
