@@ -1,6 +1,6 @@
 ﻿using RestWithASPNET.Configurations;
 using RestWithASPNET.Data.VO;
-using RestWithASPNET.Model;
+using RestWithASPNET.Repository;
 using RestWithASPNET.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

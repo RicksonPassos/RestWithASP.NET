@@ -13,7 +13,6 @@ using RestWithASPNET.Hypermedia.Enricher;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Rewrite;
 using RestWithASPNET.Services;
-using RestWithASPNET.Model;
 using RestWithASPNET.Configurations;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -112,6 +111,7 @@ builder.Services.AddApiVersioning();
 builder.Services.AddScoped<IPersonBusiness, PersonBusinessImplementation>();
 builder.Services.AddScoped<IBookBusiness, BookBusinessImplementation>();
 builder.Services.AddScoped<IloginBusiness, LoginBusinessImplementation>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 builder.Services.AddTransient<ITokenService, TokenService>();
 
